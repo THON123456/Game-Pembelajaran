@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYSTERY BOX – 40 SECRET BOX CHALLENGE</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SheetJS (xlsx) for Excel Download and Upload -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FFFBEB; /* Soft Cream */
+            color: #1E293B;
+            user-select: none;
+        }
+        
+        .font-display {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+
+        /* 3D Card Flip Animation Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-container.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Gold and Red Custom Gradients */
+        .bg-red-gradient {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+        }
+
+        .bg-gold-gradient {
+            background: linear-gradient(135deg, #FDE047 0%, #EAB308 100%);
+        }
+
+        .border-gold {
+            border-color: #FACC15;
+        }
+
+        /* Pulse and Float Keyframes */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .animate-sparkle {
+            animation: sparkle 2s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar for popups */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FEF3C7;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F59E0B;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden antialiased bg-amber-50">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-red-700 text-white shadow-lg border-b-4 border-yellow-400 sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showHome()">
+                <div class="bg-yellow-400 text-red-800 p-2 rounded-xl shadow-md font-bold text-xl">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <div>
+                    <h1 class="font-display text-lg md:text-xl font-bold leading-tight tracking-wide text-yellow-300">
+                        MYSTERY BOX
+                    </h1>
+                    <p class="text-xs text-yellow-100 font-medium">40 Secret Box Challenge</p>
+                </div>
+            </div>
+
+            <!-- Subject Identity Info Badge -->
+            <div class="hidden md:flex items-center space-x-2 bg-red-800/80 px-4 py-1.5 rounded-full border border-red-500 text-xs">
+                <span class="bg-yellow-400 text-red-900 px-2 py-0.5 rounded font-bold uppercase">IPAS</span>
+                <span class="text-yellow-100 font-semibold">Kelas VI/B</span>
+                <span class="text-red-300">•</span>
+                <span class="text-white truncate max-w-xs" title="Hubungan antar komponen biotik & abiotik serta pengaruhnya terhadap ekosistem">
+                    Komponen Biotik & Abiotik Ekosistem
+                </span>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="flex items-center space-x-2">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 bg-red-800 hover:bg-red-600 rounded-xl transition text-yellow-300 shadow" title="Suara ON/OFF">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-lg"></i>
+                </button>
+                <button onclick="toggleFullscreen()" class="p-2.5 bg-red-800 hover:bg-red-600 rounded-xl transition text-yellow-300 shadow" title="Layar Penuh">
+                    <i class="fa-solid fa-expand text-lg"></i>
+                </button>
+                <button id="resetGameBtn" onclick="confirmResetGame()" class="hidden p-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition shadow" title="Ulangi Permainan">
+                    <i class="fa-solid fa-rotate-right text-lg"></i>
+                </button>
+                <button id="homeNavBtn" onclick="showHome()" class="hidden px-3 py-2 bg-yellow-400 hover:bg-yellow-300 text-red-900 font-bold rounded-xl text-xs transition shadow flex items-center space-x-1">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="hidden sm:inline">Beranda</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: HOME PAGE (HALAMAN BERANDA)        -->
+        <!-- ========================================== -->
+        <section id="home-view" class="space-y-8 my-auto py-4">
+            
+            <!-- Hero Title & Info Section -->
+            <div class="text-center space-y-4 relative">
+                <!-- Decorative Sparkles -->
+                <div class="absolute top-0 left-10 text-yellow-400 text-3xl animate-sparkle hidden lg:block">
+                    <i class="fa-solid fa-sparkles"></i>
+                </div>
+                <div class="absolute bottom-0 right-10 text-yellow-500 text-3xl animate-sparkle hidden lg:block">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+
+                <!-- Subject Header Tag -->
+                <div class="inline-flex items-center space-x-2 bg-amber-200/80 border border-amber-300 text-amber-900 px-4 py-1.5 rounded-full text-sm font-semibold shadow-sm">
+                    <i class="fa-solid fa-graduation-cap text-red-600"></i>
+                    <span>MEDIA PEMBELAJARAN INTERAKTIF IPAS - KELAS VI FASE B</span>
+                </div>
+
+                <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-extrabold text-red-700 tracking-wider drop-shadow-md">
+                    MYSTERY BOX
+                </h1>
+                <p class="text-lg sm:text-2xl font-bold text-amber-900 tracking-wide font-display">
+                    🎁 40 SECRET BOX CHALLENGE 🎁
+                </p>
+
+                <!-- Subject Metadata Details Card -->
+                <div class="max-w-2xl mx-auto bg-amber-100/90 border-2 border-amber-300 rounded-2xl p-4 shadow-sm text-left sm:text-center text-sm sm:text-base text-slate-700 space-y-1">
+                    <p><span class="font-bold text-red-800">Mata Pelajaran:</span> Ilmu Pengetahuan Alam dan Sosial (IPAS)</p>
+                    <p><span class="font-bold text-red-800">Materi Utama:</span> Hubungan Antar Komponen Biotik & Abiotik, Serta Pengaruhnya Terhadap Ekosistem</p>
+                </div>
+            </div>
+
+            <!-- Level Selection Section -->
+            <div class="bg-white/80 backdrop-blur border-2 border-amber-200 rounded-3xl p-6 shadow-xl max-w-4xl mx-auto space-y-6">
+                <div class="text-center">
+                    <h2 class="font-display text-2xl font-bold text-red-800 tracking-wide">PILIH LEVEL PERMAINAN</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Pilih tingkat kesulitan untuk memulai tantangan 40 kotak misteri</p>
+                </div>
+
+                <!-- Level Buttons Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Easy Level Button -->
+                    <button id="btn-level-mudah" onclick="selectLevel('MUDAH')" class="level-btn relative p-5 rounded-2xl border-4 border-emerald-400 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-left transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-display font-extrabold text-lg text-emerald-800">LEVEL MUDAH</span>
+                            <div class="text-yellow-500 text-lg">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-emerald-700 leading-relaxed font-medium">
+                            Pertanyaan dasar: Mengingat & memahami fakta komponen ekosistem.
+                        </p>
+                        <div id="badge-mudah" class="mt-3 inline-block px-2.5 py-0.5 text-xs font-bold bg-emerald-200 text-emerald-900 rounded-md">
+                            40 Soal Siap
+                        </div>
+                    </button>
+
+                    <!-- Medium Level Button -->
+                    <button id="btn-level-sedang" onclick="selectLevel('SEDANG')" class="level-btn relative p-5 rounded-2xl border-4 border-amber-400 bg-amber-50 hover:bg-amber-100 text-amber-900 text-left transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-display font-extrabold text-lg text-amber-800">LEVEL SEDANG</span>
+                            <div class="text-yellow-500 text-lg">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-amber-700 leading-relaxed font-medium">
+                            Pertanyaan penerapan: Mengaitkan interaksi rantai makanan & lingkungan.
+                        </p>
+                        <div id="badge-sedang" class="mt-3 inline-block px-2.5 py-0.5 text-xs font-bold bg-amber-200 text-amber-900 rounded-md">
+                            40 Soal Siap
+                        </div>
+                    </button>
+
+                    <!-- Hard Level Button -->
+                    <button id="btn-level-sulit" onclick="selectLevel('SULIT')" class="level-btn relative p-5 rounded-2xl border-4 border-red-500 bg-red-50 hover:bg-red-100 text-red-900 text-left transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-display font-extrabold text-lg text-red-800">LEVEL SULIT</span>
+                            <div class="text-yellow-500 text-lg">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-red-700 leading-relaxed font-medium">
+                            Pertanyaan HOTS: Menganalisis dampaknya terhadap keseimbangan alam.
+                        </p>
+                        <div id="badge-sulit" class="mt-3 inline-block px-2.5 py-0.5 text-xs font-bold bg-red-200 text-red-900 rounded-md">
+                            40 Soal Siap
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Bank Management & Start Section -->
+            <div class="max-w-4xl mx-auto bg-amber-100/60 border border-amber-200 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="space-y-1 text-center md:text-left">
+                    <h3 class="font-bold text-slate-800 flex items-center justify-center md:justify-start gap-2">
+                        <i class="fa-solid fa-file-excel text-green-700 text-lg"></i>
+                        <span>Pengelolaan Bank Soal Guru</span>
+                    </h3>
+                    <p class="text-xs text-slate-600">Unduh template Excel untuk mengubah soal atau unggah bank soal buatan sendiri.</p>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-2 w-full md:w-auto">
+                    <!-- Download Template Excel Button -->
+                    <button onclick="downloadExcelTemplate()" class="px-3.5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold shadow-sm transition flex items-center space-x-2">
+                        <i class="fa-solid fa-download text-emerald-600"></i>
+                        <span>UNDUH SOAL</span>
+                    </button>
+
+                    <!-- Upload Excel File Button -->
+                    <label class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer flex items-center space-x-2">
+                        <i class="fa-solid fa-file-import"></i>
+                        <span>UNGGAH SOAL</span>
+                        <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="uploadExcelBank(event)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Start Game CTA Button -->
+            <div class="text-center pt-2">
+                <button onclick="startGame()" class="px-10 py-4 bg-red-600 hover:bg-red-700 text-yellow-300 font-display font-black text-2xl tracking-wider rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition border-4 border-yellow-400 flex items-center justify-center mx-auto space-x-3">
+                    <i class="fa-solid fa-play"></i>
+                    <span>MULAI PERMAINAN</span>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: MAIN GAME BOARD (HALAMAN UTAMA)    -->
+        <!-- ========================================== -->
+        <section id="game-view" class="hidden space-y-5 my-auto py-2">
+            
+            <!-- Game Progress Header -->
+            <div class="bg-white/90 backdrop-blur border-2 border-amber-300 rounded-2xl p-4 shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <span id="activeLevelBadge" class="px-3 py-1 bg-yellow-400 text-red-900 font-display font-bold text-sm rounded-lg shadow-sm">
+                        LEVEL MUDAH
+                    </span>
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-sm sm:text-base">Papan 40 Kotak Misteri</h2>
+                        <p class="text-xs text-slate-500">Pilih salah satu nomor kotak yang belum dibuka</p>
+                    </div>
+                </div>
+
+                <!-- Progress Indicator Bar -->
+                <div class="w-full md:w-80 space-y-1">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span class="text-slate-600">Progres Permainan</span>
+                        <span id="progressText" class="text-red-700">0 DARI 40 KARTU TELAH DIBUKA</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-300">
+                        <div id="progressBar" class="bg-gradient-to-r from-yellow-400 to-red-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 x 8 Grid Card Container (40 Mystery Cards) -->
+            <div id="cardGrid" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 gap-2.5 sm:gap-3.5 md:gap-4 max-w-6xl mx-auto">
+                <!-- Cards generated via JS -->
+            </div>
+        </section>
+
+    </main>
+
+
+    <!-- ========================================== -->
+    <!-- POP-UP MODAL: QUESTION + ANSWER RESULT     -->
+    <!-- ========================================== -->
+    <div id="questionModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-amber-50 border-4 border-red-600 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl relative animate-scaleUp space-y-5 max-h-[92vh] overflow-y-auto">
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b-2 border-amber-200 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span id="modalCardNum" class="px-3 py-1 bg-red-700 text-yellow-300 font-display font-extrabold text-lg rounded-xl shadow">
+                        KOTAK #01
+                    </span>
+                    <span id="modalDifficulty" class="px-2.5 py-0.5 bg-amber-200 text-amber-900 font-bold text-xs rounded-lg">
+                        MUDAH
+                    </span>
+                </div>
+                <button onclick="closeQuestionModal()" class="text-slate-400 hover:text-red-600 text-2xl font-bold p-1" title="Tutup">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- ================= QUESTION STAGE ================= -->
+            <div id="questionStage">
+                <div class="py-2 text-center sm:text-left">
+                    <p class="text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Pertanyaan:</p>
+                    <h3 id="modalQuestionText" class="text-lg sm:text-2xl font-bold text-slate-900 leading-relaxed">
+                        <!-- Question inserted dynamically -->
+                    </h3>
+                </div>
+
+                <div class="mt-4">
+                    <p class="text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-3">
+                        Pilih jawaban yang paling tepat:
+                    </p>
+                    <div id="answerChoices" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Multiple choice options inserted dynamically -->
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button onclick="closeQuestionModal()" class="w-full sm:w-auto px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl text-sm transition">
+                        KEMBALI KE PAPAN
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= RESULT STAGE ================= -->
+            <div id="resultStage" class="hidden space-y-4">
+                <div id="resultBanner" class="rounded-2xl p-5 text-center border-2">
+                    <div id="resultIcon" class="text-5xl mb-2"></div>
+                    <h3 id="resultStatus" class="font-display font-black text-2xl sm:text-3xl"></h3>
+                    <p id="resultMessage" class="text-sm font-semibold mt-1"></p>
+                </div>
+
+                <div class="bg-white border border-amber-200 rounded-xl p-4">
+                    <span class="font-bold text-amber-800 uppercase block mb-1 text-xs tracking-wider">
+                        Jawaban Kamu:
+                    </span>
+                    <p id="selectedAnswerText" class="font-semibold text-slate-800"></p>
+                </div>
+
+                <div class="bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-5 text-center shadow-inner">
+                    <span class="text-xs font-extrabold text-emerald-700 tracking-wider uppercase block mb-1">
+                        Jawaban Benar:
+                    </span>
+                    <div id="answerKeyText" class="text-xl sm:text-2xl font-bold text-emerald-900">
+                        <!-- Correct answer inserted dynamically -->
+                    </div>
+                </div>
+
+                <div class="bg-yellow-100 border-2 border-yellow-400 rounded-2xl p-4">
+                    <div class="flex items-center space-x-2 font-extrabold text-amber-900 border-b border-yellow-300 pb-2 mb-2">
+                        <i class="fa-solid fa-chalkboard-user text-yellow-600"></i>
+                        <span>PENJELASAN GURU</span>
+                    </div>
+                    <p id="teacherExplanation" class="leading-relaxed font-medium text-slate-800 text-sm sm:text-base">
+                        <!-- Explanation inserted dynamically -->
+                    </p>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button onclick="completeCardAndClose()" class="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition shadow flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-check"></i>
+                        <span>SELESAI & KEMBALI KE PAPAN</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- POP-UP MODAL: GAME COMPLETION CELEBRATION  -->
+    <!-- ========================================== -->
+    <div id="completionModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-amber-50 border-4 border-yellow-400 rounded-3xl max-w-lg w-full p-8 shadow-2xl text-center space-y-6">
+            <div class="text-6xl text-yellow-500 animate-bounce">
+                🏆
+            </div>
+            <div class="space-y-2">
+                <h2 class="font-display font-black text-3xl text-red-700">SELAMAT!</h2>
+                <p class="font-extrabold text-amber-900 text-lg">SELURUH MYSTERY BOX TELAH SELESAI!</p>
+                <p class="text-xs text-slate-600">Peserta didik telah berhasil menjawab dan mempelajari seluruh 40 pertanyaan ekosistem IPAS.</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <button onclick="confirmResetGame()" class="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-sm transition shadow">
+                    MAIN LAGI
+                </button>
+                <button onclick="showHome()" class="w-full sm:w-auto px-6 py-3 bg-yellow-400 hover:bg-yellow-300 text-red-950 font-bold rounded-2xl text-sm transition shadow">
+                    KEMBALI KE BERANDA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-amber-100 border-t border-amber-300 py-3 text-center text-xs font-semibold text-amber-900">
+        <p>MYSTERY BOX – 40 SECRET BOX CHALLENGE | IPAS Kelas VI</p>
+        <p class="text-red-700 font-bold mt-0.5">Game Design by Septi Misliza</p>
+    </footer>
+
+    <script>
+        /* ========================================== */
+        /* BUILT-IN QUESTION BANK DATA (40 x 3 = 120)  */
+        /* ========================================== */
+        const defaultQuestionBank = {
+            MUDAH: [
+                { id: 1, question: "Komponen ekosistem yang terdiri dari makhluk hidup disebut komponen...", answer: "Biotik", hint: "Biotik berasal dari kata 'bio' yang artinya hidup." },
+                { id: 2, question: "Komponen ekosistem yang terdiri dari benda mati atau tak hidup disebut...", answer: "Abiotik", hint: "Contohnya seperti air, tanah, dan udara." },
+                { id: 3, question: "Tumbuhan hijau dalam rantai makanan berperan sebagai...", answer: "Produsen", hint: "Tumbuhan dapat membuat makanannya sendiri melalui fotosintesis." },
+                { id: 4, question: "Hewan pemakan tumbuhan saja disebut sebagai hewan...", answer: "Herbivora", hint: "Contoh hewan ini adalah sapi, kambing, dan kelinci." },
+                { id: 5, question: "Hewan pemakan daging saja disebut hewan...", answer: "Karnivora", hint: "Contoh hewan ini adalah singa, harimau, dan elang." },
+                { id: 6, question: "Hewan yang memakan tumbuhan maupun daging hewan lain disebut...", answer: "Omnivora", hint: "Contohnya adalah ayam, bebek, dan tikus." },
+                { id: 7, question: "Organisme pengurai seperti bakteri dan jamur disebut...", answer: "Dekomposer (Pengurai)", hint: "Tugasnya menguraikan sisa makhluk hidup yang telah mati." },
+                { id: 8, question: "Proses pembuatan makanan sendiri pada tumbuhan hijau dengan bantuan cahaya matahari disebut...", answer: "Fotosintesis", hint: "Proses ini membutuhkan air, karbondioksida, dan sinar matahari." },
+                { id: 9, question: "Sumber energi utama bagi seluruh kehidupan di bumi adalah...", answer: "Matahari", hint: "Sinar ini memberikan panas dan cahaya bagi bumi." },
+                { id: 10, question: "Kumpulan dari beberapa rantai makanan yang saling berhubungan dalam ekosistem disebut...", answer: "Jaring-jaring makanan", hint: "Bentuknya lebih kompleks dibanding rantai makanan tunggal." },
+                { id: 11, question: "Tempat hidup asli suatu makhluk hidup disebut...", answer: "Habitat", hint: "Contohnya: kolam untuk ikan, hutan untuk harimau." },
+                { id: 12, question: "Hubungan timbal balik antara makhluk hidup dengan lingkungannya disebut...", answer: "Ekosistem", hint: "Mencakup interaksi biotik dan abiotik." },
+                { id: 13, question: "Gas yang dihirup oleh hewan dan manusia saat bernapas adalah...", answer: "Oksigen (O2)", hint: "Gas ini dihasilkan oleh tumbuhan saat fotosintesis." },
+                { id: 14, question: "Gas yang dibutuhkan tumbuhan hijau untuk proses fotosintesis adalah...", answer: "Karbondioksida (CO2)", hint: "Gas yang dikeluarkan manusia saat menghembuskan napas." },
+                { id: 15, question: "Sebutkan 2 contoh komponen abiotik yang ada di lingkungan sekolah!", answer: "Batu, tanah, udara, air, atau cahaya matahari", hint: "Pilih benda-benda tak hidup di sekitarmu." },
+                { id: 16, question: "Sebutkan 2 contoh komponen biotik yang ada di taman sekolah!", answer: "Rumput, bunga, kupu-kupu, semut, atau pohon", hint: "Pilih makhluk hidup yang beraktivitas di taman." },
+                { id: 17, question: "Sapi, kambing, dan ulat dalam rantai makanan menduduki tingkat konsumen ke-...", answer: "Konsumen I (Satu)", hint: "Mereka memakan langsung produsen (tumbuhan)." },
+                { id: 18, question: "Singa dan elang yang memakan herbivora menduduki tingkat konsumen ke-...", answer: "Konsumen II (Dua) / Karnivora", hint: "Mereka memakan konsumen tingkat pertama." },
+                { id: 19, question: "Air, suhu, dan kelembapan termasuk ke dalam komponen ekosistem jenis...", answer: "Abiotik", hint: "Semua elemen tersebut tidak bernapas." },
+                { id: 20, question: "Padi -> Belalang -> Katak -> Ular -> Elang. Yang bertindak sebagai produsen adalah...", answer: "Padi", hint: "Makhluk hidup pertama yang menghasilkan makanan." },
+                { id: 21, question: "Padi -> Belalang -> Katak -> Ular -> Elang. Katak bertindak sebagai konsumen ke-...", answer: "Konsumen II (Dua)", hint: "Katak memakan belalang (Konsumen I)." },
+                { id: 22, question: "Tanaman eceng gondok hidup dan beradaptasi di habitat ekosistem...", answer: "Air (Akuatik)", hint: "Tanaman ini mengapung di permukaan kolam atau sungai." },
+                { id: 23, question: "Pohon jati menggugurkan daunnya pada musim kemarau untuk mengurangi...", answer: "Penguapan air (Transpirasi)", hint: "Bentuk adaptasi abiotik terhadap ketersediaan air." },
+                { id: 24, question: "Makhluk hidup tunggal dalam suatu ekosistem disebut...", answer: "Individu", hint: "Contoh: Seekor burung, sebatang pohon kelapa." },
+                { id: 25, question: "Kumpulan makhluk hidup sejenis yang hidup di tempat dan waktu yang sama disebut...", answer: "Populasi", hint: "Contoh: Sekumpulan sapi di padang rumput." },
+                { id: 26, question: "Seluruh kumpulan berbagai populasi yang hidup dan berinteraksi di suatu wilayah dinamakan...", answer: "Komunitas", hint: "Terdiri dari populasi rumput, populasi belalang, populasi katak." },
+                { id: 27, question: "Bagian tanah tempat akar tumbuhan menyerap nutrisi dan air termasuk komponen...", answer: "Abiotik", hint: "Tanah adalah media tumbuh bukan benda hidup." },
+                { id: 28, question: "Zat hijau daun pada tumbuhan yang berfungsi menyerap cahaya matahari disebut...", answer: "Klorofil", hint: "Penyebab utama daun berwarna hijau." },
+                { id: 29, question: "Cacing tanah membantu menyuburkan tanah dengan cara membuat rongga udara, ini hubungan antara komponen...", answer: "Biotik mempengaruhi Abiotik", hint: "Cacing (hidup) mengubah kondisi tanah (tak hidup)." },
+                { id: 30, question: "Benalu yang menempel pada pohon mangga menyerap air dan hara. Benalu disebut...", answer: "Parasit", hint: "Organisme yang merugikan inangnya." },
+                { id: 31, question: "Apa peran jamur dan bakteri setelah konsumen puncak mati?", answer: "Menguraikan jasad mati menjadi zat hara tanah", hint: "Proses pembusukan/dekomposisi." },
+                { id: 32, question: "Lautan, sungai, dan kolam merupakan contoh ekosistem...", answer: "Air (Akuatik)", hint: "Lingkungan yang didominasi oleh air." },
+                { id: 33, question: "Hutan, padang rumput, dan gurun merupakan contoh ekosistem...", answer: "Darat (Terestrial)", hint: "Lingkungan daratan." },
+                { id: 34, question: "Ikan bernapas di dalam air menggunakan organ...", answer: "Insang", hint: "Organ khusus untuk menyaring oksigen terlarut dalam air." },
+                { id: 35, question: "Hewan yang aktif mencari makan pada malam hari disebut hewan...", answer: "Nokturnal", hint: "Contohnya burung hantu dan kelelawar." },
+                { id: 36, question: "Tanaman kaktus menyimpan cadangan air di bagian...", answer: "Batang yang tebal", hint: "Batangnya berdaging dan berlapis lilin." },
+                { id: 37, question: "Sinar matahari membantu tumbuhan pembentuk karbohidrat. Ini hubungan antara komponen...", answer: "Abiotik mempengaruhi Biotik", hint: "Cahaya matahari (tak hidup) membantu tumbuhan (hidup)." },
+                { id: 38, question: "Kelinci memakan wortel di kebun. Wortel berperan sebagai...", answer: "Produsen / Makanan", hint: "Organisme fotosintetik penyuplai energi." },
+                { id: 39, question: "Ular sawah memangsa tikus. Peran ular sawah adalah sebagai...", answer: "Predator / Pemangsa (Konsumen)", hint: "Hewan yang berburu hewan lain." },
+                { id: 40, question: "Lingkungan buatan manusia contohnya adalah...", answer: "Sawah, kolam ikan, atau waduk", hint: "Lingkungan yang sengaja dibuat oleh manusia." }
+            ],
+            SEDANG: [
+                { id: 1, question: "Jika jumlah belalang di sawah tiba-tiba punah, dampak langsung pada populasi katak adalah...", answer: "Populasi katak akan menurun karena kekurangan makanan", hint: "Katak memakan belalang sebagai sumber energi utama." },
+                { id: 2, question: "Simbiosis mutualisme terjadi antara burung jalak dan kerbau karena...", answer: "Kerbau bebas kutu dan burung jalak mendapatkan makanan", hint: "Keduanya saling menguntungkan." },
+                { id: 3, question: "Tanaman anggrek yang menempel pada pohon mangga merupakan contoh symbiosis...", answer: "Komensalisme", hint: "Anggrek diuntungkan dapat tempat, pohon mangga tidak dirugikan." },
+                { id: 4, question: "Penebangan hutan secara liar dapat menyebabkan banjir karena komponen abiotik berupa...", answer: "Tanah kehilangan daya serap air akibat hilangnya akar pohon", hint: "Akar pohon menyerap dan menahan air hujan di tanah." },
+                { id: 5, question: "Mengapa eceng gondok yang tumbuh terlalu lebat di danau dapat merusak ekosistem air?", answer: "Menutup sinar matahari dan mengurangi oksigen terlarut bagi ikan", hint: "Permukaan air tertutup rapat oleh daun eceng gondok." },
+                { id: 6, question: "Mengapa petani sering memelihara burung hantu di area perkebunan kelapa sawit?", answer: "Sebagai pemangsa alami (predator) hama tikus", hint: "Pengendalian hama secara biologi/alami." },
+                { id: 7, question: "Fitoplankton -> Zooplankton -> Ikan Kecil -> Ikan Besar. Fitoplankton berada pada ekosistem...", answer: "Air / Laut / Danau", hint: "Mikroorganisme fotosintetik mengapung di air." },
+                { id: 8, question: "Apa yang terjadi pada tanah jika penggunaan pupuk kimia dilakukan secara berlebihan?", answer: "Kualitas dan kesuburan tanah alami merosot serta cacing tanah mati", hint: "Bahan kimia berlebih merusak organisme pengurai tanah." },
+                { id: 9, question: "Simbiosis parasitisme terjadi antara cacing pita dan tubuh manusia karena...", answer: "Cacing pita menyerap nutrisi manusia sehingga manusia dirugikan", hint: "Satu pihak untung, pihak lain rugi." },
+                { id: 10, question: "Peristiwa rantai makanan di bawah ini yang terjadi di ekosistem laut adalah...", answer: "Fitoplankton -> Udang -> Ikan Kakap -> Hiu", hint: "Perhatikan organisme khas air asin." },
+                { id: 11, question: "Tanaman kaktus memiliki daun berbentuk duri. Penyesuaian ini bertujuan untuk...", answer: "Mengurangi penguapan air di daerah gurun yang panas", hint: "Bentuk adaptasi terhadap komponen abiotik iklim kering." },
+                { id: 12, question: "Mengapa tumbuhan jagung menggulungkan daunnya saat cuaca sangat panas?", answer: "Untuk mengurangi penguapan air dari daun", hint: "Respon biotik terhadap suhu dan panas matahari." },
+                { id: 13, question: "Jika populasi ular sawah ditangkapi secara berlebihan oleh manusia, akibatnya adalah...", answer: "Populasi tikus melonjak pesat dan merusak tanaman padi", hint: "Ular adalah pemangsa alami tikus." },
+                { id: 14, question: "Peran cacing tanah dalam menjaga keseimbangan komponen abiotik tanah adalah...", answer: "Gemburkan tanah dan tingkatkan rongga udara serta humus", hint: "Aktivitas cacing membuat struktur tanah gembur." },
+                { id: 15, question: "Jelaskan pengaruh erosi tanah terhadap kualitas air di sungai sekitar!", answer: "Air sungai menjadi keruh dan tertutup endapan lumpur", hint: "Partikel tanah abiotik terbawa air hujan ke sungai." },
+                { id: 16, question: "Mengapa gas karbon monoksida dari asap kendaraan berbahaya bagi ekosistem?", answer: "Mencemari udara dan meracuni sistem pernapasan makhluk hidup", hint: "Dampak komponen abiotik beracun bagi biotik." },
+                { id: 17, question: "Ikan anemon dan anemon laut hidup bersama. Hubungan ini dinamakan...", answer: "Simbiosis Mutualisme", hint: "Ikan terlindung dari predator, anemon dapat sisa makanan." },
+                { id: 18, question: "Apa dampak pembuangan sampah plastik ke dalam laut bagi hewan laut?", answer: "Hewan laut tertelan plastik atau terjerat hingga mati", hint: "Komponen abiotik anorganik mengganggu kehidupan biotik." },
+                { id: 19, question: "Bagaimanakah tumbuhan bakau (mangrove) mencegah abrasi pantai?", answer: "Akar tunggangnya yang kuat menahan deburan gelombang laut", hint: "Peran tanaman pesisir menjaga daratan." },
+                { id: 20, question: "Pada piramida makanan, organisme yang memiliki jumlah populasi dan energi terbesar adalah...", answer: "Produsen (Tumbuhan/Alga)", hint: "Berada pada dasar piramida makanan." },
+                { id: 21, question: "Apa fungsi punuk pada unta saat berkelana di gurun pasir?", answer: "Menyimpan cadangan lemak sebagai sumber energi dan air", hint: "Adaptasi morfologi hewan gurun." },
+                { id: 22, question: "Mengapa penebangan pohon di hulu sungai dapat menyebabkan kekeringan saat musim kemarau?", answer: "Tidak ada akar pohon yang menyimpan cadangan air tanah", hint: "Fungsi hutan sebagai penyerap air hujan." },
+                { id: 23, question: "Ikan gurami yang dipindahkan dari air tawar ke air laut akan mati karena...", answer: "Perbedaan kadar garam (salinitas) yang terlalu tinggi", hint: "Pengaruh faktor abiotik kadar garam pada sel tubuh ikan." },
+                { id: 24, question: "Sebutkan pengaruh intensitas cahaya matahari terhadap pertumbuhan tanaman di tempat gelap!", answer: "Tanaman mengalami etiolasi (tumbuh cepat tapi pucat dan lemah)", hint: "Tanaman kekurangan klorofil akibat tanpa cahaya." },
+                { id: 25, question: "Tumbuhan teratai memiliki daun yang lebar dan tipis dengan tujuan...", answer: "Mempercepat penguapan air karena hidup di air", hint: "Adaptasi hidrofit di lingkungan berair." },
+                { id: 26, question: "Hubungan antara ikan hiu dan ikan remora merupakan contoh simbiosis...", answer: "Komensalisme", hint: "Ikan remora berlindung dan makan sisa, hiu tidak terganggu." },
+                { id: 27, question: "Jika di kolam terdapat kotoran ikan bertumpuk, bakteri pengurai akan mengubahnya menjadi...", answer: "Zat hara / Nutrisi bagi tumbuhan air", hint: "Dekomposisi bahan organik menjadi anorganik." },
+                { id: 28, question: "Manakah organisme yang dapat mengubah energi matahari menjadi energi kimia?", answer: "Tumbuhan hijau / Alga (Produsen)", hint: "Organisme autotrof melalui fotosintesis." },
+                { id: 29, question: "Mengapa terumbu karang di laut sangat bergantung pada kejernihan air laut?", answer: "Sinar matahari butuh menembus air untuk fotosintesis alga simbion", hint: "Zooxanthellae butuh cahaya matahari." },
+                { id: 30, question: "Bebek memiliki selaput pada kakinya. Fungsi selaput tersebut adalah...", answer: "Memudahkan berenang di air dan berjalan di lumpur", hint: "Adaptasi bentuk tubuh terhadap habitat abiotik basah." },
+                { id: 31, question: "Pencemaran limbah detergen di sungai menyebabkan pembentukan busa. Dampaknya adalah...", answer: "Menghalangi masuknya oksigen dari udara ke dalam air sungai", hint: "Menghambat pertukaran gas abiotik di permukaan air." },
+                { id: 32, question: "Mengapa kambing dan sapi berkompetisi jika ditempatkan di padang rumput yang sama?", answer: "Mereka memperebutkan sumber makanan yang sama yaitu rumput", hint: "Kompetisi interspesifik untuk makanan." },
+                { id: 33, question: "Apakah akibat dari peristiwa efek rumah kaca bagi ekosistem kutub?", answer: "Suhu naik memicu mencairnya es dan hilangnya habitat beruang kutub", hint: "Pemanasan global mengganggu komponen abiotik es." },
+                { id: 34, question: "Organisme yang tidak dapat membuat makanannya sendiri dan bergantung pada organisme lain disebut...", answer: "Heterotrof (Konsumen)", hint: "Contohnya manusia dan hewan." },
+                { id: 35, question: "Jelaskan perbedaan peran produsen dan dekomposer dalam siklus nutrisi!", answer: "Produsen membentuk zat organik, dekomposer menguraikannya kembali", hint: "Satu pembuat, satu pengurai." },
+                { id: 36, question: "Bunga bangkai mengeluarkan bau busuk untuk merespons komponen biotik yaitu...", answer: "Attraktan menarik lalat dan serangga untuk membantu penyerbukan", hint: "Menarik serangga pollinator." },
+                { id: 37, question: "Mengapa hewan di daerah kutub seperti beruang kutub memiliki lapisan lemak yang tebal?", answer: "Sebagai isolator penahan dingin dari suhu udara abiotik yang ekstrem", hint: "Adaptasi terhadap suhu lingkungan sangat dingin." },
+                { id: 38, question: "Sebutkan urutan tingkatan organisasi kehidupan dari terluas ke terkecil!", answer: "Ekosistem -> Komunitas -> Populasi -> Individu", hint: "Mulai dari gabungan lingkungan sampai makhluk tunggal." },
+                { id: 39, question: "Apa fungsi stomata pada daun tumbuhan?", answer: "Tempat pertukaran gas O2 dan CO2 serta penguapan air", hint: "Mulut daun tempat bernapas tumbuhan." },
+                { id: 40, question: "Kehadiran cacing parasit di dalam usus ayam mengakibatkan ayam menjadi kurus. Mengapa?", answer: "Nutrisi makanan ayam diserap oleh cacing parasit", hint: "Interaksi parasitisme memindahkan energi." }
+            ],
+            SULIT: [
+                { id: 1, question: "Analisislah dampak eutrofikasi (pengayaan nutrisi pupuk) di danau terhadap populasi ikan!", answer: "Alga meledak (blooming), saat mati diurai bakteri yang menghabiskan oksigen terlarut sehingga ikan mati massal", hint: "Ledakan alga mengurangi kadar O2 terlarut dalam air secara drastis." },
+                { id: 2, question: "Jika terjadi pencemaran pestisida DDT di perairan, organisme manakah yang menampung konsentrasi racun tertinggi (Bioakumulasi)?", answer: "Konsumen puncak (seperti Burung Elang laut / Predato pakan ikan)", hint: "Prinsip Biomagnifikasi pada rantai makanan." },
+                { id: 3, question: "Bagaimanakah deforestasi (penebangan hutan) mempengaruhi siklus karbon di atmosfer bumi?", answer: "Kadar CO2 di udara meningkat pesat karena berkurangnya pohon pembeli fotosintesis", hint: "Pohon berfungsi sebagai penyerap utama gas CO2." },
+                { id: 4, question: "Jelaskan skenario yang terjadi pada piramida energi jika populasi produsen berkurang hingga 50%!", answer: "Energi untuk konsumen I, II, dan III berkurang pesat memicu penurunan populasi di seluruh tingkat", hint: "Produsen adalah fondasi utama penyuplai energi." },
+                { id: 5, question: "Mengapa fenomena hujan asam dapat merusak ekosistem hutan dan perairan tawar?", answer: "Hujan asam menurunkan pH tanah & air menjadi asam, merusak jaringan daun serta meracuni mikroorganisme", hint: "Asam mengubah faktor abiotik derajat keasaman (pH)." },
+                { id: 6, question: "Di sebuah pulau terisolasi, predator puncak punah. Evaluasilah dampak jangka panjang terhadap daya dukung lingkungan pulau tersebut!", answer: "Populasi herbivora meledak, vegetasi habis terakumulasi (overgrazing), memicu kelaparan dan krisis ekosistem", hint: "Tanpa kontrol predator, timbul ketidakseimbangan tropik." },
+                { id: 7, question: "Mengapa introduksi spesies asing (spesies invasif) seperti ikan lepak/aligator dapat merusak ekosistem lokal?", answer: "Memangsa spesies lokal tanpa kontrol karena tidak memiliki predator alami di tempat baru", hint: "Kompetisi dan kepunahan spesies asli." },
+                { id: 8, question: "Bandingkan perbedaan transfer energi dan daur materi dalam ekosistem!", answer: "Energi mengalir satu arah dan menyusut (lepas sebagai panas), sedangkan materi berdaur ulang secara tertutup", hint: "Energi tidak kembali, materi bersiklus (karbon, air, nitrogen)." },
+                { id: 9, question: "Bagaimanakah aktivitas pembakaran bahan bakar fosil menyebabkan fenomena pemanasan global dan pergeseran ekosistem?", answer: "Pelepasan emisi CO2 mempertebal lapisan gas rumah kaca, menahan panas di bumi dan merubah iklim global", hint: "Gas CO2 menahan radiasi inframerah matahari." },
+                { id: 10, question: "Jelaskan konsekuensi terjadinya fenomena El Nino (kekeringan panjang) terhadap interaksi biotik dan abiotik di kebun sawit!", answer: "Kekeringan air (abiotik) menurunkan pembentukan bunga/buah sawit serta meningkatkan risiko kebakaran hutan (biotik)", hint: "Defisit air ekstrem mengganggu fisiologi tumbuhan." },
+                { id: 11, question: "Mengapa populasi zooplankton sangat tergantung pada intensitas cahaya dan suhu di lapisan permukaan laut (Zona Fotik)?", answer: "Karena zooplankton memakan fitoplankton yang membutuhkan cahaya matahari untuk fotosintesis", hint: "Zona fotik adalah area laut yang tertembus cahaya matahari." },
+                { id: 12, question: "Evaluasilah peran terumbu karang sebagai 'Engine of Biodiversity' bagi komponen biotik di ekosistem laut!", answer: "Menyediakan habitat, tempat pemijahan, berlindung, dan mencari makan bagi 25% spesies laut", hint: "Rumah dan pusat rantai makanan laut." },
+                { id: 13, question: "Jelaskan mekanisme adapatasi fisiologis serangga yang resisten terhadap pemakaian pestisida terus menerus!", answer: "Terjadi seleksi alam di mana individu dengan gen kebal bertahan hidup dan mewariskan sifat resisten", hint: "Prinsip seleksi alam dan evolusi cepat." },
+                { id: 14, question: "Mengapa pencemaran minyak mentah di permukaan laut dapat membunuh mamalia laut seperti lumba-lumba dan paus?", answer: "Lapisan minyak menutup lubang napas (blowhole) dan merusak lapisan isolator bulu/kulit mereka", hint: "Menghalangi pengambilan oksigen abiotik di udara." },
+                { id: 15, question: "Jelaskan hubungan antara efek albedo es di kutub dengan stabilitas suhu global!", answer: "Es memantulkan cahaya matahari (albedo tinggi); jika es mencair, laut menyerap panas lebih banyak dan mempercepat pemanasan", hint: "Umpan balik positif pemanasan global." },
+                { id: 16, question: "Dalam rantai makanan detritus, dari manakah sumber energi utama berasal?", answer: "Dari hancuran bahan organik mati (detritus) bukan dari tumbuhan hidup", hint: "Contoh: Daun gugur -> Cacing tanah -> Burung." },
+                { id: 17, question: "Mengapa pembuangan limbah panas (thermal pollution) dari pembangkit listrik ke sungai berbahaya bagi ikan?", answer: "Suhu air meningkat menurunkan kelarutan gas oksigen terlarut (DO) yang dibutuhkan ikan", hint: "Hubungan suhu air dan kadar oksigen terlarut." },
+                { id: 18, question: "Analisislah mengapa kawasan hutan hujan tropis memiliki tingkat keanekaragaman hayati tertinggi di bumi!", answer: "Suhu hangat konstan, curah hujan tinggi, dan sinar matahari melimpah sepanjang tahun mendukung fotosintesis", hint: "Kombinasi faktor abiotik ideal sepanjang tahun." },
+                { id: 19, question: "Jelaskan peranan bakteri *Rhizobium* pada bintil akar tanaman kacang-kacangan!", answer: "Mengikat (fiksasi) gas nitrogen bebas dari udara menjadi bentuk nitrat yang dapat diserap tanaman", hint: "Simbiosis mutualisme fiksasi nitrogen." },
+                { id: 20, question: "Bagaimanakah dampak konversi lahan hutan menjadi pemukiman terhadap siklus hidrologi lokal?", answer: "Infiltrasi air berkurang, limpasan permukaan naik, risiko banjir saat hujan dan kekeringan saat kemarau", hint: "Serapan air hujan ke dalam tanah terganggu." },
+                { id: 21, question: "Mengapa energi yang ditransfer dari satu tingkat trofik ke tingkat trofik berikutnya hanya sekitar 10%?", answer: "90% energi terbuang sebagai panas respirasi, bergerak, dan ekskresi (Sisa makanan)", hint: "Hukum 10 persen dalam rantai makanan." },
+                { id: 22, question: "Evaluasilah kelebihan metode pengandalian hama terpadu (PBT) dibanding penggunaan pestisida kimia sintetis!", answer: "PBT menjaga keseimbangan ekosistem tanpa membunuh musuh alami dan mencegah resistensi hama", hint: "Penggunaan predator alami dan perangkap." },
+                { id: 23, question: "Mengapa pembukaan lahan dengan cara membakar hutan dapat merusak struktur mikroflora tanah?", answer: "Suhu panas ekstrem membunuh bakteri dan jamur menguntungkan serta menghancurkan bahan organik tanah", hint: "Kerusakan biologis abiotik lapisan top soil tanah." },
+                { id: 24, question: "Jelaskan peranan vegetasi mangrove sebagai benteng alami terhadap fenomena tsunami!", answer: "Akar dan batangnya yang rapat memecah energi gelombang air laut sebelum mencapai daratan", hint: "Peredam gelombang mekanis alami." },
+                { id: 25, question: "Analisislah dampak dari peristiwa perburuan liar hiu terhadap keseimbangan ekosistem terumbu karang!", answer: "Hilangnya hiu membuat populasi ikan karnivora sedang melonjak, memangsa ikan pemakan alga (herbivora), alga menutupi karang", hint: "Trophic cascade effect." },
+                { id: 26, question: "Mengapa tanaman karnivora seperti kantong semar tumbuh di tanah yang kekurangan unsur Nitrogen?", answer: "Mereka memeras/mencerna serangga untuk mendapatkan pasokan unsur Nitrogen (N)", hint: "Adaptasi menangkap nutrisi dari biotik lain." },
+                { id: 27, question: "Bagaimanakah hubungan antara pencemaran timbal (Pb) dari asap kendaraan dengan gangguan kesehatan anak?", answer: "Timbal terhirup mengendap dalam darah dan jaringan tubuh, merusak perkembangan saraf dan otak", hint: "Dampak pencemaran logam berat abiotik." },
+                { id: 28, question: "Jelaskan fenomena suksesi primer yang terjadi setelah gunung berapi meletus dan meluluhlantakkan tanah!", answer: "Dimulai dari munculnya organisme perintis (lumut kerak), membentuk tanah hingga tumbuh tumbuhan perintis", hint: "Pembentukan ekosistem baru dari batuan mati." },
+                { id: 29, question: "Mengapa pembentukan gas metana (CH4) dari sampah organik di TPA berbahaya jika tidak dikelola?", answer: "Metana adalah gas rumah kaca berbahaya (25x lebih kuat dari CO2) dan mudah meledak", hint: "Gas hasil dekomposisi anaerob." },
+                { id: 30, question: "Evaluasilah pengaruh terhalangnya sinar matahari oleh kabut asap terhadap produktivitas pertanian padi!", answer: "Laju fotosintesis menurun drastis sehingga pengisian bulir padi tidak maksimal dan panen anjlok", hint: "Pengaruh hambatan faktor abiotik cahaya pada fotosintesis." },
+                { id: 31, question: "Jelaskan mengapa populasi jamur dan bakteri meningkat pesat di lantai hutan hujan tropis yang lembap!", answer: "Suhu hangat dan kelembapan tinggi abiotik menyediakan kondisi optimal untuk dekomposisi", hint: "Kondisi fisik favorit pengurai." },
+                { id: 32, question: "Mengapa penggunaan jaring pukat harimau (trawl) dilarang dalam penangkapan ikan di laut?", answer: "Merusak terumbu karang dan meraut seluruh benih ikan muda tanpa seleksi", hint: "Eksploitasi tak ramah lingkungan merusak habitat." },
+                { id: 33, question: "Analisislah proses terjadinya fenomena pemutihan karang (Coral Bleaching) akibat kenaikan suhu laut!", answer: "Suhu panas membuat karang stres dan mengeluarkan alga simbion (Zooxanthellae), karang menjadi putih dan mati", hint: "Pelepasan alga penyuplai warna dan makanan karang." },
+                { id: 34, question: "Sebutkan perbedaan prinsip antara ekosistem alami dan ekosistem buatan (seperti sawah) dalam hal keanekaragaman hayati!", answer: "Ekosistem alami beranekaragam dan stabil; ekosistem buatan monokultur dan rentan serangan hama", hint: "Tingkat keanekaragaman menentukan stabilitas." },
+                { id: 35, question: "Mengapa klorofluorokarbon (CFC) dari AC/kulkas dapat merusak lapisan ozon di stratosfer?", answer: "CFC terurai menghasilkan klorin yang memecah molekul ozon (O3) penyaring sinar ultraviolet", hint: "Penipisan perisai UV bumi." },
+                { id: 36, question: "Jelaskan bagaimana pengikisan tanah gurun (penjelukan/desertifikasi) dapat meluas akibat penggembalaan liar!", answer: "Tumbuhan habis dimakan, tanah terbuka tererosi angin dan matahari hingga menjadi padang pasir tandus", hint: "Kerusakan vegetasi memicu perluasan gurun." },
+                { id: 37, question: "Mengapa tanaman fitoremediasi (seperti enceng gondok atau bunga matahari) digunakan dalam pemulihan lahan tercemar?", answer: "Mampu menyerap dan mengakumulasi logam berat/racun dari tanah atau air tercemar", hint: "Pembersihan lingkungan menggunakan biotik tumbuhan." },
+                { id: 38, question: "Jelaskan keterkaitan antara ketersediaan Oksigen Terlarut (Dissolved Oxygen) dengan kelangsungan hidup biota air!", answer: "Semakin tinggi DO semakin seimbang respirasi biota air; jika DO mendekati nol, terjadi zona mati (dead zone)", hint: "Oksigen terlarut adalah kunci napas organisme air." },
+                { id: 39, question: "Analisislah dampak dari perubahan penggunaan lahan rawa menjadi pemukiman terhadap banjir perkotaan!", answer: "Hilangnya daerah resapan dan penampung air alami, menyebabkan luapan air hujan langsung menutupi kota", hint: "Rawa berfungsi sebagai spons penampung air." },
+                { id: 40, question: "Evaluasilah pentingnya menjaga keanekaragaman hayati (biodiversitas) demi kelangsungan masa depan manusia!", answer: "Menjamin ketersediaan pangan, obat-obatan, pemurni udara/air, dan menjaga stabilitas iklim global", hint: "Jasa ekosistem bagi kehidupan manusia." }
+            ]
+        };
+
+        /* ========================================== */
+        /* GAME STATE VARIABLES                       */
+        /* ========================================== */
+        let currentQuestionBank = JSON.parse(JSON.stringify(defaultQuestionBank));
+        let activeLevel = 'MUDAH';
+        let openedCards = []; // Array of opened card numbers (1 to 40)
+        let currentCardIndex = null;
+        let isSoundEnabled = true;
+        let audioCtx = null;
+
+        /* ========================================== */
+        /* WEB AUDIO API SYNTHESIZER (NO AUDIO FILES)  */
+        /* ========================================== */
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+        }
+
+        function playSound(type) {
+            if (!isSoundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'flip') {
+                    // Mystery Box Opening Sound (Sweep)
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'hint') {
+                    // Lightbulb hint sound (Ding)
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'reveal') {
+                    // Answer reveal sound (Chime chord)
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.24); // C6
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                } else if (type === 'victory') {
+                    // Victory Fanfare
+                    const notes = [440, 554.37, 659.25, 880];
+                    notes.forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'triangle';
+                        o.frequency.value = freq;
+                        g.gain.setValueAtTime(0.2, now + i * 0.12);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.35);
+                        o.start(now + i * 0.12);
+                        o.stop(now + i * 0.12 + 0.35);
+                    });
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                }
+            } catch (e) {
+                console.log("Audio playback error:", e);
+            }
+        }
+
+        function toggleSound() {
+            isSoundEnabled = !isSoundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const btn = document.getElementById('soundToggleBtn');
+            if (isSoundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-lg';
+                btn.classList.replace('bg-slate-600', 'bg-red-800');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-lg';
+                btn.classList.replace('bg-red-800', 'bg-slate-600');
+            }
+            playSound('click');
+        }
+
+        function toggleFullscreen() {
+            playSound('click');
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        /* ========================================== */
+        /* LEVEL SELECTION & GAME NAVIGATION          */
+        /* ========================================== */
+        function selectLevel(level) {
+            playSound('click');
+            activeLevel = level;
+
+            // Reset selection borders
+            ['mudah', 'sedang', 'sulit'].forEach(lvl => {
+                const btn = document.getElementById(`btn-level-${lvl}`);
+                btn.classList.remove('ring-4', 'ring-yellow-400', 'scale-105');
+            });
+
+            const activeBtn = document.getElementById(`btn-level-${level.toLowerCase()}`);
+            if (activeBtn) {
+                activeBtn.classList.add('ring-4', 'ring-yellow-400', 'scale-105');
+            }
+        }
+
+        function updateQuestionBankBadges() {
+            ['MUDAH', 'SEDANG', 'SULIT'].forEach(lvl => {
+                const count = currentQuestionBank[lvl] ? currentQuestionBank[lvl].length : 0;
+                const badge = document.getElementById(`badge-${lvl.toLowerCase()}`);
+                if (badge) {
+                    badge.innerText = `${count}/40 Soal Siap`;
+                    if (count >= 40) {
+                        badge.className = "mt-3 inline-block px-2.5 py-0.5 text-xs font-bold bg-emerald-200 text-emerald-900 rounded-md";
+                    } else {
+                        badge.className = "mt-3 inline-block px-2.5 py-0.5 text-xs font-bold bg-red-200 text-red-900 rounded-md";
+                    }
+                }
+            });
+        }
+
+        function startGame() {
+            playSound('click');
+            const questions = currentQuestionBank[activeLevel];
+            
+            if (!questions || questions.length < 40) {
+                alert(`Jumlah soal pada LEVEL ${activeLevel} kurang dari 40 soal (${questions ? questions.length : 0}/40). Harap lengkapi bank soal atau unggah file Excel terlebih dahulu!`);
+                return;
+            }
+
+            // Switch views
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('game-view').classList.remove('hidden');
+            document.getElementById('resetGameBtn').classList.remove('hidden');
+            document.getElementById('homeNavBtn').classList.remove('hidden');
+
+            // Update Header level badge
+            const badge = document.getElementById('activeLevelBadge');
+            badge.innerText = `LEVEL ${activeLevel}`;
+
+            renderGrid();
+            updateProgressBar();
+            saveStateToLocalStorage();
+        }
+
+        function showHome() {
+            playSound('click');
+            document.getElementById('home-view').classList.remove('hidden');
+            document.getElementById('game-view').classList.add('hidden');
+            document.getElementById('resetGameBtn').classList.add('hidden');
+            document.getElementById('homeNavBtn').classList.add('hidden');
+        }
+
+        /* ========================================== */
+        /* CARD GRID GENERATION & CARD INTERACTIONS   */
+        /* ========================================== */
+        function renderGrid() {
+            const grid = document.getElementById('cardGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 40; i++) {
+                const isOpened = openedCards.includes(i);
+                const numStr = i < 10 ? `0${i}` : `${i}`;
+
+                const cardHtml = `
+                    <div id="card-container-${i}" onclick="handleCardClick(${i})" class="card-container perspective-1000 h-24 sm:h-28 md:h-32 cursor-pointer group ${isOpened ? 'flipped' : ''}">
+                        <div class="card-inner relative w-full h-full rounded-2xl shadow-md border-2 ${isOpened ? 'border-slate-300' : 'border-yellow-400 group-hover:border-white'} transition-all duration-300">
+                            
+                            <!-- Front of Card (Unopened Mystery Box) -->
+                            <div class="card-front bg-red-gradient text-white flex flex-col items-center justify-between p-2 rounded-2xl shadow-inner group-hover:scale-[1.02] transition-transform">
+                                <span class="text-[10px] sm:text-xs font-bold text-yellow-300 tracking-wider">BOX #${numStr}</span>
+                                <div class="text-2xl sm:text-3xl md:text-4xl text-yellow-300 font-display font-black my-auto drop-shadow-md group-hover:scale-110 transition-transform">
+                                    ?
+                                </div>
+                                <div class="text-[9px] font-semibold text-red-200 flex items-center space-x-1">
+                                    <i class="fa-solid fa-gift text-yellow-300"></i>
+                                    <span>Buka Box</span>
+                                </div>
+                            </div>
+
+                            <!-- Back of Card (Opened & Disabled Box) -->
+                            <div class="card-back bg-slate-200 border-2 border-slate-300 text-slate-500 flex flex-col items-center justify-center p-2 rounded-2xl shadow-inner opacity-90">
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-lg sm:text-xl font-bold shadow-sm mb-1">
+                                    ✓
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-600">SELESAI</span>
+                                <span class="text-[9px] text-slate-400 font-bold">#${numStr}</span>
+                            </div>
+
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHtml;
+            }
+        }
+
+        function handleCardClick(cardNum) {
+            if (openedCards.includes(cardNum)) {
+                return; // Card already opened
+            }
+
+            currentCardIndex = cardNum;
+            playSound('flip');
+
+            // Trigger card flip animation
+            const container = document.getElementById(`card-container-${cardNum}`);
+            if (container) {
+                container.classList.add('flipped');
+            }
+
+            // Open Question Modal after animation delay
+            setTimeout(() => {
+                openQuestionModal(cardNum);
+            }, 350);
+        }
+
+
+        /* ========================================== */
+        /* QUESTION POPUP + MULTIPLE CHOICE + RESULT */
+        /* ========================================== */
+
+        let currentQuestionOptions = [];
+        let currentQuestionData = null;
+        let currentAnswerSelected = false;
+
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        /*
+         * Bank soal lama hanya memiliki question, answer, dan hint.
+         * Agar tetap kompatibel, pilihan ganda dibuat otomatis dari jawaban
+         * soal lain jika field "options" belum tersedia.
+         *
+         * Jika guru mengisi options: ["A", "B", "C", "D"], pilihan tersebut
+         * akan digunakan langsung.
+         */
+        function getQuestionOptions(qData, questions) {
+            if (Array.isArray(qData.options) && qData.options.length >= 4) {
+                return shuffleArray(qData.options.slice(0, 4));
+            }
+
+            const correctAnswer = qData.answer;
+            const distractors = shuffleArray(
+                questions
+                    .map(q => q.answer)
+                    .filter(a => a && a !== correctAnswer)
+            );
+
+            const uniqueOptions = [correctAnswer];
+            for (const answer of distractors) {
+                if (!uniqueOptions.includes(answer)) {
+                    uniqueOptions.push(answer);
+                }
+                if (uniqueOptions.length === 4) break;
+            }
+
+            // Safety fallback if a custom bank has fewer than 4 unique answers.
+            while (uniqueOptions.length < 4) {
+                uniqueOptions.push(`Pilihan ${String.fromCharCode(65 + uniqueOptions.length)}`);
+            }
+
+            return shuffleArray(uniqueOptions.slice(0, 4));
+        }
+
+        function openQuestionModal(cardNum) {
+            const numStr = cardNum < 10 ? `0${cardNum}` : `${cardNum}`;
+            const questions = currentQuestionBank[activeLevel];
+            const qData = questions[cardNum - 1] || {
+                question: `Pertanyaan nomor ${cardNum} belum tersedia.`,
+                answer: "Belum ada jawaban.",
+                hint: "Belum ada penjelasan guru."
+            };
+
+            currentQuestionData = qData;
+            currentAnswerSelected = false;
+            currentQuestionOptions = getQuestionOptions(qData, questions);
+
+            document.getElementById('modalCardNum').innerText = `KOTAK #${numStr}`;
+            document.getElementById('modalDifficulty').innerText = activeLevel;
+            document.getElementById('modalQuestionText').innerText = qData.question;
+
+            // Reset to question stage every time a box is opened.
+            document.getElementById('questionStage').classList.remove('hidden');
+            document.getElementById('resultStage').classList.add('hidden');
+
+            renderAnswerChoices();
+
+            document.getElementById('questionModal').classList.remove('hidden');
+        }
+
+        function renderAnswerChoices() {
+            const container = document.getElementById('answerChoices');
+            container.innerHTML = '';
+
+            const labels = ['A', 'B', 'C', 'D'];
+
+            currentQuestionOptions.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className =
+                    'answer-choice w-full text-left p-4 bg-white border-2 border-slate-200 ' +
+                    'hover:border-red-500 hover:bg-red-50 rounded-2xl transition-all duration-200 ' +
+                    'shadow-sm hover:shadow-md flex items-start gap-3';
+
+                button.innerHTML = `
+                    <span class="shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-700 font-extrabold flex items-center justify-center">
+                        ${labels[index]}
+                    </span>
+                    <span class="font-semibold text-slate-800 leading-relaxed">${escapeHtml(option)}</span>
+                `;
+
+                button.onclick = () => submitAnswer(index);
+                container.appendChild(button);
+            });
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement('div');
+            div.textContent = String(value ?? '');
+            return div.innerHTML;
+        }
+
+        function submitAnswer(selectedIndex) {
+            if (currentAnswerSelected || !currentQuestionData) return;
+
+            currentAnswerSelected = true;
+            playSound('click');
+
+            const selectedAnswer = currentQuestionOptions[selectedIndex];
+            const correctAnswer = currentQuestionData.answer;
+            const isCorrect = selectedAnswer === correctAnswer;
+
+            document.getElementById('questionStage').classList.add('hidden');
+            document.getElementById('resultStage').classList.remove('hidden');
+
+            const banner = document.getElementById('resultBanner');
+            const icon = document.getElementById('resultIcon');
+            const status = document.getElementById('resultStatus');
+            const message = document.getElementById('resultMessage');
+
+            if (isCorrect) {
+                banner.className = 'rounded-2xl p-5 text-center border-2 bg-emerald-50 border-emerald-400';
+                icon.innerHTML = '🎉';
+                status.innerText = 'JAWABAN BENAR!';
+                status.className = 'font-display font-black text-2xl sm:text-3xl text-emerald-700';
+                message.innerText = 'Hebat! Kamu berhasil memilih jawaban yang tepat.';
+                playSound('reveal');
+            } else {
+                banner.className = 'rounded-2xl p-5 text-center border-2 bg-red-50 border-red-400';
+                icon.innerHTML = '❌';
+                status.innerText = 'JAWABAN BELUM TEPAT';
+                status.className = 'font-display font-black text-2xl sm:text-3xl text-red-700';
+                message.innerText = 'Tidak apa-apa. Perhatikan jawaban benar dan penjelasan guru.';
+                playSound('click');
+            }
+
+            document.getElementById('selectedAnswerText').innerText = selectedAnswer;
+            document.getElementById('answerKeyText').innerText = correctAnswer;
+
+            // "explanation" can be supplied by a future bank.
+            // For the existing bank, the current "hint" is used as the explanation.
+            document.getElementById('teacherExplanation').innerText =
+                currentQuestionData.explanation ||
+                currentQuestionData.hint ||
+                'Pahami kembali konsep pada pertanyaan ini.';
+        }
+
+        function closeQuestionModal() {
+            playSound('click');
+            document.getElementById('questionModal').classList.add('hidden');
+        }
+
+        function completeCardAndClose() {
+            playSound('click');
+
+            // A box is considered completed only after the student answers.
+            if (!currentAnswerSelected) return;
+
+            if (currentCardIndex && !openedCards.includes(currentCardIndex)) {
+                openedCards.push(currentCardIndex);
+            }
+
+            document.getElementById('questionModal').classList.add('hidden');
+            updateProgressBar();
+            saveStateToLocalStorage();
+
+            if (openedCards.length >= 40) {
+                setTimeout(() => {
+                    triggerCompletionCelebration();
+                }, 400);
+            }
+        }
+
+        function updateProgressBar() {
+            const count = openedCards.length;
+            const percentage = (count / 40) * 100;
+
+            document.getElementById('progressText').innerText =
+                `${count} DARI 40 KARTU TELAH DIBUKA`;
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+        }
+
+        function triggerCompletionCelebration() {
+            playSound('victory');
+            document.getElementById('completionModal').classList.remove('hidden');
+
+            // Fire Confetti Animation
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function confirmResetGame() {
+            playSound('click');
+            if (confirm("Apakah Anda yakin ingin mengulangi permainan? Seluruh status kotak yang telah dibuka akan direset.")) {
+                openedCards = [];
+                saveStateToLocalStorage();
+                renderGrid();
+                updateProgressBar();
+                document.getElementById('completionModal').classList.add('hidden');
+            }
+        }
+
+        /* ========================================== */
+        /* EXCEL TEMPLATE DOWNLOAD & UPLOAD (SHEETJS) */
+        /* ========================================== */
+
+        function downloadExcelTemplate() {
+            playSound('click');
+
+            let fullRows = [];
+
+            ['MUDAH', 'SEDANG', 'SULIT'].forEach(lvl => {
+                const list = currentQuestionBank[lvl] || [];
+
+                for (let i = 0; i < 40; i++) {
+                    const q = list[i];
+
+                    if (q) {
+                        const options = getQuestionOptions(q, list);
+
+                        fullRows.push({
+                            "Nomor Soal": i + 1,
+                            "Pertanyaan": q.question,
+                            "Pilihan A": options[0] || "",
+                            "Pilihan B": options[1] || "",
+                            "Pilihan C": options[2] || "",
+                            "Pilihan D": options[3] || "",
+                            "Kunci Jawaban": q.answer,
+                            "Tingkat Kesulitan": lvl,
+                            "Penjelasan Guru": q.explanation || q.hint || ""
+                        });
+                    } else {
+                        fullRows.push({
+                            "Nomor Soal": i + 1,
+                            "Pertanyaan": `Contoh Pertanyaan ${lvl} Nomor ${i + 1}`,
+                            "Pilihan A": "Pilihan A",
+                            "Pilihan B": "Pilihan B",
+                            "Pilihan C": "Pilihan C",
+                            "Pilihan D": "Pilihan D",
+                            "Kunci Jawaban": "Pilihan A",
+                            "Tingkat Kesulitan": lvl,
+                            "Penjelasan Guru": "Penjelasan soal"
+                        });
+                    }
+                }
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(fullRows);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Bank Soal");
+
+            XLSX.writeFile(workbook, "Mystery_Box_Bank_Soal_IPAS_Kelas_VI.xlsx");
+        }
+
+        function uploadExcelBank(event) {
+            playSound('click');
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.SheetNames[0];
+                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+
+                    if (!jsonData || jsonData.length === 0) {
+                        alert("File Excel kosong atau format tidak valid!");
+                        return;
+                    }
+
+                    let newBank = { MUDAH: [], SEDANG: [], SULIT: [] };
+                    let errors = [];
+
+                    jsonData.forEach((row, index) => {
+                        const rowNum = index + 2; // Row offset in Excel
+                        const qText = row["Pertanyaan"] || row["pertanyaan"];
+                        const qAns = row["Kunci Jawaban"] || row["kunci jawaban"] || row["KunciJawaban"];
+                        const qLevel = (row["Tingkat Kesulitan"] || row["tingkat kesulitan"] || row["Level"] || "").toString().toUpperCase().trim();
+                        const qExplanation = row["Penjelasan Guru"] || row["penjelasan guru"] || row["PenjelasanGuru"] || row["Petunjuk Guru"] || row["petunjuk guru"] || "";
+                        const excelOptions = [
+                            row["Pilihan A"] || row["pilihan a"] || "",
+                            row["Pilihan B"] || row["pilihan b"] || "",
+                            row["Pilihan C"] || row["pilihan c"] || "",
+                            row["Pilihan D"] || row["pilihan d"] || ""
+                        ].map(v => String(v).trim()).filter(Boolean);
+
+                        if (!qText || !qAns || !qLevel) {
+                            errors.push(`Baris ${rowNum}: Kolom Pertanyaan, Kunci Jawaban, atau Tingkat Kesulitan tidak lengkap.`);
+                            return;
+                        }
+
+                        if (!['MUDAH', 'SEDANG', 'SULIT'].includes(qLevel)) {
+                            errors.push(`Baris ${rowNum}: Level "${qLevel}" tidak dikenal (Gunakan: MUDAH, SEDANG, atau SULIT).`);
+                            return;
+                        }
+
+                        newBank[qLevel].push({
+                            id: newBank[qLevel].length + 1,
+                            question: qText,
+                            answer: qAns,
+                            options: excelOptions.length >= 4 ? excelOptions : undefined,
+                            explanation: qExplanation,
+                            hint: qExplanation
+                        });
+                    });
+
+                    if (errors.length > 0) {
+                        alert("PEMBERITAHUAN VALIDASI FILE EXCEL:\n\n" + errors.slice(0, 5).join("\n") + (errors.length > 5 ? `\n...dan ${errors.length - 5} kesalahan lainnya.` : ""));
+                    }
+
+                    // Update bank if valid questions found
+                    let updatedCount = 0;
+                    ['MUDAH', 'SEDANG', 'SULIT'].forEach(lvl => {
+                        if (newBank[lvl].length > 0) {
+                            currentQuestionBank[lvl] = newBank[lvl];
+                            updatedCount += newBank[lvl].length;
+                        }
+                    });
+
+                    updateQuestionBankBadges();
+                    saveStateToLocalStorage();
+                    alert(`BANK SOAL BERHASIL DIMUAT!\nTotal ${updatedCount} soal berhasil diunggah.`);
+
+                } catch (err) {
+                    alert("Gagal membaca file Excel. Pastikan file menggunakan ekstensi .xlsx atau .xls yang valid.");
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        /* ========================================== */
+        /* LOCALSTORAGE PERSISTENCE MANAGEMENT        */
+        /* ========================================== */
+        function saveStateToLocalStorage() {
+            const state = {
+                activeLevel,
+                openedCards,
+                currentQuestionBank
+            };
+            localStorage.setItem('mystery_box_ipas_state', JSON.stringify(state));
+        }
+
+        function loadStateFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('mystery_box_ipas_state');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.activeLevel) activeLevel = parsed.activeLevel;
+                    if (parsed.openedCards) openedCards = parsed.openedCards;
+                    if (parsed.currentQuestionBank) currentQuestionBank = parsed.currentQuestionBank;
+                }
+            } catch (e) {
+                console.error("Failed to load local state", e);
+            }
+        }
+
+        /* ========================================== */
+        /* INITIALIZATION ON WINDOW LOAD              */
+        /* ========================================== */
+        window.onload = function() {
+            loadStateFromLocalStorage();
+            selectLevel(activeLevel);
+            updateQuestionBankBadges();
+        };
+    </script>
+</body>
+</html>
